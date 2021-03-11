@@ -7,20 +7,26 @@ GERACOES = 1000;
 QTDE_POPULACAO = 10;
 TAXA_MUTACAO = 0.1;
 
-
 function reval = fitness(cromo)
-  soma = 0;
+  decimal = 0;
+  inverso_cromo = flip(cromo);
   for i =  1:length(cromo)
-      soma = soma + cromo(i);
+    binario = inverso_cromo(i);
+    decimal = decimal + 2**(i-1) * binario;
   endfor
-  reval = soma;
+  reval = decimal;
+endfunction
+
+function reval = gerar_binarios()
+  binarios = randi(2, 1, 6);
+  reval = rem(binarios, 2);
 endfunction
 
 function reval = mutacao(cromo)
   cromo = cromo.cromo;
   for i =  1:length(cromo)
       if deve_mutacionar()
-        cromo(i) = rand(1, 1);
+        cromo(i) = !cromo(i);
       endif
   endfor
   y.cromo = cromo;
@@ -30,7 +36,7 @@ endfunction;
 
 function reval = deve_mutacionar()
   global TAXA_MUTACAO
-  aleatorio = rand(1, 1);
+  aleatorio = randi(100) / 100;
   if aleatorio < TAXA_MUTACAO
     reval = true;
   else
@@ -42,8 +48,8 @@ function reval = cross_over(cromo1, cromo2)
   cromo3 = zeros(1, 5);
   
   for i =  1:length(cromo1)
-    aleatorio = rand(1, 1);
-    if aleatorio > 0.5
+    aleatorio = randi(2);
+    if aleatorio == 2
       cromo3(i) = cromo1(i);
     else
       cromo3(i) = cromo2(i);
@@ -55,7 +61,7 @@ function reval = cross_over(cromo1, cromo2)
 endfunction
 
 function y = gerar_cromo()
-    y.cromo = rand(1, 5);
+    y.cromo = gerar_binarios();
     y.fitness = fitness(y.cromo);
 endfunction
 
@@ -96,19 +102,22 @@ function y = criar_estrutura_cromo(tamanho_gene)
   y = cromos;
 endfunction
 
-populacao = gerar_populacao_com_fitness(QTDE_POPULACAO);
+populacao = gerar_populacao_com_fitness(QTDE_POPULACAO)
 
 for i = 1:GERACOES
+  printf("***** Geracoes: %d *********\n", i);
   melhores_cromos = escolher_melhor_cromo(populacao);
   cromo_com_cross_over = cross_over(
     melhores_cromos(1).cromo, melhores_cromos(2).cromo
   );
   cromo_com_cross_over = mutacao(cromo_com_cross_over);
-  cromo_com_cross_over.fitness
+  cromo_com_cross_over.fitness;
   populacao = gerar_populacao_com_fitness(QTDE_POPULACAO - 1);
   populacao(end+1) = cromo_com_cross_over;
   populacao;
 endfor
+
+cromo_com_cross_over
 
 
 
