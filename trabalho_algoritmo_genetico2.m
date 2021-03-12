@@ -3,17 +3,30 @@ clear
 clc
 
 
-GERACOES = 1000;
+GERACOES = 100;
 QTDE_POPULACAO = 10;
 TAXA_MUTACAO = 0.1;
 
+function reval = funcao_a_ser_maximizada(x)
+  reval = -(x**2) + 5;
+endfunction
+
 function reval = fitness(cromo)
+  decimal = bin_to_decimal(cromo);
+  reval = funcao_a_ser_maximizada(decimal);
+endfunction
+
+function reval = bin_to_decimal(cromo)
   decimal = 0;
   inverso_cromo = flip(cromo);
-  for i =  1:length(cromo)
+  for i =  1:length(cromo)-1
     binario = inverso_cromo(i);
     decimal = decimal + 2**(i-1) * binario;
   endfor
+
+  if cromo(1) == 1
+    decimal = decimal * (-1);
+  endif
   reval = decimal;
 endfunction
 
@@ -81,6 +94,10 @@ function y = escolher_melhor_cromo(populacao)
     fitness = populacao(i).fitness;
     cromo = populacao(i).cromo;
     if fitness > melhores_cromos(1).fitness
+      if melhores_cromos(1).fitness != -inf
+        melhores_cromos(2).fitness = melhores_cromos(1).fitness;
+        melhores_cromos(2).cromo = melhores_cromos(1).cromo;        
+      endif
       melhores_cromos(1).fitness = fitness;
       melhores_cromos(1).cromo = cromo;
       continue;
@@ -96,13 +113,13 @@ endfunction
 function y = criar_estrutura_cromo(tamanho_gene)
   cromos(1, tamanho_gene) = struct();
   for i = 1:length(cromos)
-    cromos(i).fitness = 0;
+    cromos(i).fitness = -inf;
     cromos(i).cromo = [];  
   endfor
   y = cromos;
 endfunction
 
-populacao = gerar_populacao_com_fitness(QTDE_POPULACAO)
+populacao = gerar_populacao_com_fitness(QTDE_POPULACAO);
 
 for i = 1:GERACOES
   printf("***** Geracoes: %d *********\n", i);
@@ -114,10 +131,12 @@ for i = 1:GERACOES
   cromo_com_cross_over.fitness;
   populacao = gerar_populacao_com_fitness(QTDE_POPULACAO - 1);
   populacao(end+1) = cromo_com_cross_over;
-  populacao;
 endfor
 
-cromo_com_cross_over
+display('Valor maximo da funcao de x^2-5 e: \n');
+printf('Parametro mais otimizado da funcao e: %d \n', bin_to_decimal(cromo_com_cross_over.cromo));
+cromo_com_cross_over.cromo
+cromo_com_cross_over.fitness
 
 
 
