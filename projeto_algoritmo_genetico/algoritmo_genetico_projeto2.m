@@ -4,18 +4,18 @@ clc
 
 GERACOES = [20 40 80 100];
 QTDE_POPULACAO = 36;
-QTDE_INDIVIDUOS_SELECIONADOS = 18;
+QTDE_INDIVIDUOS_SELECIONADOS = 36;
 TAXA_MUTACAO = 0.01;
 TAXA_CRUZAMENTO = 0.25;
-TAXA_DE_ELITISMO = 0.5;
+TAXA_DE_ELITISMO = 0.2;
 
 function reval = funcao_a_ser_minimizada(x, y)
-  reval = 100 * (y - x)**2 + (y - 2)**2;
+  reval = 100 * (y - x**2)**2 + (1 - x)**2;
 endfunction
 
 function reval = fitness(cromo)
   f0 = funcao_a_ser_minimizada(cromo(1), cromo(2));
-  reval = 1/f0;
+  reval = 1/(1 + f0);
 endfunction
 
 function reval = mutacao(populacao, TAXA_MUTACAO)
@@ -82,7 +82,7 @@ endfunction
 
 function reval = selecao(populacao, qtde_individuos_selecionados)
   aptidoes = aptidoes_populacao(populacao);
-  total_aptidao = sum(aptidoes)
+  total_aptidao = sum(aptidoes);
   individuo_escolhidos = [];
   for i = 1:qtde_individuos_selecionados
     indice_de_individuo_escolhido = girar_roleta(total_aptidao, aptidoes);
@@ -148,11 +148,10 @@ function reval = elitismo(populacao, TAXA_DE_ELITISMO)
   aptidoes = aptidoes_populacao(populacao);
   [aptidoes_decrescente, ids_aptidoes] = sort(aptidoes, "descend");
   populacao_elitizada = [];
-
-  for i = 1:TAXA_DE_ELITISMO 
+  qtde_individuos_elite = ceil(length(populacao) * TAXA_DE_ELITISMO);
+  for i = 1:qtde_individuos_elite 
     populacao_elitizada = [populacao_elitizada populacao(ids_aptidoes(i))];
   endfor
-  # printf("populacao elitizada: %d \n", length(populacao_elitizada));
   reval = populacao_elitizada;
 endfunction
 
@@ -174,7 +173,11 @@ for i = 1:length(GERACOES)
   hold on;
   display('Valor minimo da funcao de 100 * (y - x)**2 + (y - 2)**2 e: ');
   printf('Parametro mais otimizado da funcao e x:%d, y:%d . N de geracoes:%d \n', melhor_individuo.cromo(1), melhor_individuo.cromo(2), GERACOES(i));
-
+  printf(
+    'F(x,y) = %d, fitness = %d', 
+    funcao_a_ser_minimizada(melhor_individuo.cromo(1), melhor_individuo.cromo(2)), 
+    melhor_individuo.fitness
+  );
 endfor
 
 title("Grafico de aptidao x geracao");
